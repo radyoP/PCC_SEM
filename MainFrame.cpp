@@ -5,7 +5,7 @@
 #include <iostream>
 #include "MainFrame.h"
 
-MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent), num_points(num_points), points(num_points) {
+MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::FramelessWindowHint), num_points(num_points), points(num_points) {
     setMinimumSize(480, 320);
     //setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setAcceptDrops(true);
@@ -14,7 +14,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent), num_poin
         auto point = new DragLabel(this, i);
         points[i] = point;
         point->setText("Text");
-        auto pixmap = QPixmap(R"(images/black_dot.png)");
+        auto pixmap = QPixmap(R"(../images/black_dot.png)");
         point->setPixmap(pixmap);
         point->move(5+i*(460/(num_points-1)), 160);
         point->show();

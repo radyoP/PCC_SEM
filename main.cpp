@@ -27,8 +27,10 @@ int main(int argc, char *argv[]) {
     }*/
     mainWidget.setWindowTitle(QObject::tr("Test"));
     mainWidget.setFixedSize(480, 320);
+    mainWidget.move(0,0);
+    mainWidget.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     mainWidget.show();
     //o.show();
-
+    QApplication::setOverrideCursor(Qt::BlankCursor);
     return app.exec();
 }
