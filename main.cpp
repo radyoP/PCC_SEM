@@ -18,15 +18,15 @@ int main(int argc, char *argv[]) {
     QWidget mainWidget;
 
     // layout
-    QHBoxLayout *horizontalLayout = new QHBoxLayout(&mainWidget);
+    auto *horizontalLayout = new QHBoxLayout(&mainWidget);
     horizontalLayout->setMargin(0);
-    auto widget = new MainFrame(&mainWidget);
-    widget->setNumPoints(6);
+    auto widget = new MainFrame(&mainWidget, 6);
     horizontalLayout->addWidget(widget);
     /*for(auto label : widget->points){
         horizontalLayout->addWidget(label);
     }*/
     mainWidget.setWindowTitle(QObject::tr("Test"));
+    mainWidget.setFixedSize(480, 320);
     mainWidget.show();
     //o.show();
 

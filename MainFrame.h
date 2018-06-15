@@ -12,9 +12,8 @@
 class MainFrame : public QFrame{
     Q_OBJECT
 public:
-    explicit MainFrame(QWidget *parent);
+    explicit MainFrame(QWidget *parent, int num_points);
 
-    void setNumPoints(int num_points);
 
     QVector<DragLabel*> points;
 

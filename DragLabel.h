@@ -18,14 +18,21 @@ public:
 
     void mouseMoveEvent(QMouseEvent *event) override;
 
-
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+    void setLeftRight(DragLabel *left, DragLabel *right);
 private:
+    void clampPosition();
+
     const int idx;
 
     bool pressed = false;
 
     QPoint offset;
+
+    DragLabel* left;
+
+    DragLabel* right;
 
 
 };

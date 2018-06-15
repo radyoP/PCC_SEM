@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>images/blue_dot.png</file>
+    <file>images/black_dot.png</file>
 </qresource>
 </RCC>
