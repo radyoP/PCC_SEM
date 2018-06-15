@@ -37,7 +37,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
 
 void MainFrame::paintEvent(QPaintEvent *event) {
     QPoint offset(points[0]->width()/2,points[0]->height()/2);
-    std::cout << "Paint event" << std::endl;
+    //std::cout << "Paint event" << std::endl;
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     QPainterPath path;
