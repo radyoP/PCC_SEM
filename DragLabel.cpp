@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "DragLabel.h"
+#include "utils.h"
 #include <algorithm>
 
 DragLabel::DragLabel(QWidget *parent, const int idx)
@@ -41,8 +42,8 @@ void DragLabel::clampPosition() {
     int right_bound = (right == nullptr) ? 480 - (pixmap()->width()) / 2: right->pos().x()-1;
     int x = pos().x();
     QPoint new_pos;
-    new_pos.setX(std::clamp(x, left_bound, right_bound));
-    new_pos.setY(std::clamp(pos().y(), 0, 320 - (pixmap()->height()) / 2));
+    new_pos.setX(clamp(x, left_bound, right_bound));
+    new_pos.setY(clamp(pos().y(), 0, 320 - (pixmap()->height()) / 2));
     move(new_pos);
 }
 
