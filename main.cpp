@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QtCore/QResource>
+#include <QtGui/QPainter>
 #include "MainFrame.h"
 
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[]) {
     // layout
     auto *horizontalLayout = new QHBoxLayout(&mainWidget);
     horizontalLayout->setMargin(0);
-    auto widget = new MainFrame(&mainWidget, 10);
+    auto widget = new MainFrame(&mainWidget, 12);
     horizontalLayout->addWidget(widget);
     /*for(auto label : widget->points){
         horizontalLayout->addWidget(label);
@@ -34,6 +35,8 @@ int main(int argc, char *argv[]) {
     QPalette palette;
     palette.setBrush(QPalette::Background, bg_pixmap);
     mainWidget.setPalette(palette);
+
+
 
     mainWidget.show();
     //o.show();
