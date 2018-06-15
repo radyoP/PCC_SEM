@@ -21,6 +21,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event) override;
 
     void setLeftRight(DragLabel *left, DragLabel *right);
+
 private:
     void clampPosition();
 
@@ -34,6 +35,13 @@ private:
 
     DragLabel* right;
 
+    QLine* leftLine;
+
+    QLine* rigthLine;
+public:
+    void setLeftLine(QLine *leftLine);
+
+    void setRigthLine(QLine *rigthLine);
 
 };
 

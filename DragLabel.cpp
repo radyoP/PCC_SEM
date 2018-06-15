@@ -22,6 +22,7 @@ void DragLabel::mouseMoveEvent(QMouseEvent *event) {
         //std::cout << (event->buttons() & Qt::LeftButton) << std::endl;
         this->move(mapToParent(event->pos() - offset));
         clampPosition();
+        parentWidget()->update();
     }
 
     QWidget::mouseMoveEvent(event);
@@ -35,6 +36,7 @@ void DragLabel::mouseReleaseEvent(QMouseEvent *event) {
     this->move(mapToParent(event->pos() - offset));
     clampPosition();
     pressed = false;
+    parentWidget()->update();
 }
 
 void DragLabel::clampPosition() {
@@ -51,5 +53,14 @@ void DragLabel::setLeftRight(DragLabel *left, DragLabel *right) {
     this->left = left;
     this->right = right;
 }
+
+void DragLabel::setLeftLine(QLine *leftLine) {
+    DragLabel::leftLine = leftLine;
+}
+
+void DragLabel::setRigthLine(QLine *rigthLine) {
+    DragLabel::rigthLine = rigthLine;
+}
+
 
 

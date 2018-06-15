@@ -17,6 +17,13 @@ public:
 
     QVector<DragLabel*> points;
 
+    QVector<QLine*> lines;
+
+    void paintEvent(QPaintEvent *event) override;
+
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+
 private:
     int num_points;
 
