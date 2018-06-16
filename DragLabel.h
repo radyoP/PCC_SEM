@@ -9,6 +9,7 @@
 #include <QtWidgets/QLabel>
 #include <QMouseEvent>
 
+
 class DragLabel : public QLabel {
     Q_OBJECT
 public:

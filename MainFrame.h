@@ -23,12 +23,18 @@ public:
 
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+    void setCurr_value(int curr_value);
+
+    void send();
 
 private:
     int num_points;
 
+    int curr_value;
 
+    double get_y_time(double x);
 
+    QPoint offset;
 
 
 };

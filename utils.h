@@ -7,10 +7,12 @@
 
 #include <algorithm>
 
-template <typename T>
-T clamp(const T& n, const T& lower, const T& upper) {
-    return std::max(lower, std::min(n, upper));
-}
+    template <typename T>
+    T clamp(const T& n, const T& lower, const T& upper) {
+        return std::max(lower, std::min(n, upper));
+    }
+
+
 
 
 #endif //PCC_SEM_UTILS_H
