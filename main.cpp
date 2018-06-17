@@ -8,6 +8,7 @@
 #include <QtCore/QResource>
 #include <QtGui/QPainter>
 #include "MainFrame.h"
+#include "NetworkChecker.h"
 
 
 int main(int argc, char *argv[]) {
@@ -21,12 +22,10 @@ int main(int argc, char *argv[]) {
     // layout
     auto *horizontalLayout = new QHBoxLayout(&mainWidget);
     horizontalLayout->setMargin(0);
-    auto widget = new MainFrame(&mainWidget, 12);
-    horizontalLayout->addWidget(widget);
-    /*for(auto label : widget->points){
-        horizontalLayout->addWidget(label);
-    }*/
-    mainWidget.setWindowTitle(QObject::tr("Test"));
+    auto mainFrame = new MainFrame(&mainWidget, 12);
+    horizontalLayout->addWidget(mainFrame);
+
+    mainWidget.setWindowTitle(QObject::tr("Led controller"));
     mainWidget.setFixedSize(480, 320);
     mainWidget.move(0,0);
     mainWidget.setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -39,7 +38,6 @@ int main(int argc, char *argv[]) {
 
 
     mainWidget.show();
-    //o.show();
     //QApplication::setOverrideCursor(Qt::BlankCursor);
     return app.exec();
 }

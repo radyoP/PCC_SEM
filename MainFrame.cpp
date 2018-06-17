@@ -6,14 +6,18 @@
 #include <QPainterPath>
 #include <QPainter>
 #include <QtCore/QTime>
+#include <QtCore/QTimer>
+#include <QtCore/QThread>
 #include "MainFrame.h"
 #include "utils.h"
+#include "NetworkChecker.h"
+#include "Configuration.h"
 
 
 #define WIDTH 480
 #define HEIGHT 320
 
-MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::FramelessWindowHint), num_points(num_points), points(num_points), lines(num_points+2) {
+MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::FramelessWindowHint), num_points(num_points), points(num_points), lines(num_points+2), config("../config.txt") {
     setMinimumSize(WIDTH, HEIGHT );
 
     //setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
@@ -22,12 +26,16 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     auto pixmap = QPixmap(R"(../images/orange_dot.png)");
     this->offset= QPoint(pixmap.width()/2,pixmap.height()/2);
 
+
+    auto x = config.getX();
+    auto y = config.getY();
     /* Creating points */
     for (int i = 0; i < num_points; ++i) {
         auto point = new DragLabel(this, i);
         points[i] = point;
         point->setPixmap(pixmap);
-        point->move(QPoint((WIDTH/num_points/2) + i*(WIDTH/(num_points)) , HEIGHT/2)-offset);
+        point->move(QPoint(x[i], y[i]));
+        //point->move(QPoint((WIDTH/num_points/2) + i*(WIDTH/(num_points)) , HEIGHT/2)-offset);
         point->show();
         point->setAttribute(Qt::WA_DeleteOnClose);
     }
@@ -36,6 +44,28 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
         points[i]->setLeftRight((i == 0) ? nullptr : points[i-1],
                                 (i == num_points-1) ? nullptr : points[i+1]);
     }
+
+    auto networkCheckerThread = new QThread;
+    networkCheckerThread->start();
+
+    auto ntwChecker = new NetworkChecker(this,3, config.getIp());
+    ntwChecker->moveToThread(networkCheckerThread);
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainFrame::timedUpdate);
+    timer->start(1000);
+
+    /*
+    std::vector<int> x(num_points);
+    std::transform(points.begin(), points.end(), x.begin(), [](DragLabel* point) -> int { return point->x();});
+    config.setX(x);
+    std::vector<int> y(num_points);
+    std::transform(points.begin(), points.end(), y.begin(), [](DragLabel* point) -> int { return point->y();});
+    config.setY(y);
+    config.setIp("192.168.0.103");
+    config.save();
+    */
+
 
 
 
@@ -68,19 +98,13 @@ void MainFrame::paintEvent(QPaintEvent *event) {
     /* converting to x y values */
     double x_time = ((double) WIDTH) / 86400000.0 * time;
     double y_time = get_y_time(x_time);
-    setCurr_value(y_time); // Maybe i shouldn't do this so often
+    setCurr_value((int) y_time); // Maybe i shouldn't do this so often
 
     linePainter.setPen(QPen(QColor(255,0,0), 2, Qt::SolidLine));
     linePainter.drawLine(QLineF(x_time, 0, x_time, HEIGHT));
 
-    linePainter.setBrush(QColor(255,0,0));
-    linePainter.drawEllipse(QPoint((int) x_time, (int) y_time), 4,4);
 
-
-
-    //std::cout << "Paint event" << std::endl;
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    linePainter.setRenderHint(QPainter::Antialiasing);
     QPainterPath path;
     path.moveTo(QPoint(points[num_points-1]->pos()-QPoint(WIDTH, 0)+offset));
     path.lineTo(points[0]->pos()+offset);
@@ -88,16 +112,16 @@ void MainFrame::paintEvent(QPaintEvent *event) {
         path.lineTo(points[i]->pos()+offset);
     }
     path.lineTo(QPoint(points[0]->pos() + QPoint(WIDTH,0) + offset));
+    linePainter.setPen(QPen(QColor(255,159,48), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
-    painter.setPen(QPen(QColor(255,159,48), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-
-    painter.drawPath(path);
-
+    linePainter.drawPath(path);
 
 
+    linePainter.setBrush(QColor(255,0,0));
+    linePainter.setPen(QPen(QColor(255,0,0), 0));
+    linePainter.drawEllipse(QPointF( x_time, y_time), 4,4);
 
-
-
+    std::cout << "x :" << x_time << " y: " << y_time << std::endl;
 
 }
 
@@ -140,6 +164,24 @@ double MainFrame::get_y_time(double x) {
     return intersection.y();
 
 }
+
+void MainFrame::timedUpdate() {
+    update();
+    update_config();
+}
+
+MainFrame::~MainFrame() {
+    update_config();
+}
+
+void MainFrame::update_config() {
+    std::vector<int> x(num_points),  y(num_points);
+    std::transform(points.begin(), points.end(), x.begin(), [](DragLabel* point) -> int { return point->x();});
+    std::transform(points.begin(), points.end(), y.begin(), [](DragLabel* point) -> int { return point->y();});
+    config.setXY(x,y);
+}
+
+
 
 
 

@@ -8,12 +8,14 @@
 
 #include <QtWidgets/QFrame>
 #include "DragLabel.h"
+#include "Configuration.h"
 
 class MainFrame : public QFrame{
     Q_OBJECT
 public:
     explicit MainFrame(QWidget *parent, int num_points);
 
+    virtual ~MainFrame();
 
     QVector<DragLabel*> points;
 
@@ -27,6 +29,10 @@ public:
 
     void send();
 
+    void timedUpdate();
+
+    std::atomic<bool> computer_is_on_network = {true};
+
 private:
     int num_points;
 
@@ -35,6 +41,10 @@ private:
     double get_y_time(double x);
 
     QPoint offset;
+
+    Configuration config;
+
+    void update_config();
 
 
 };
