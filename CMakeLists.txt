@@ -4,7 +4,9 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(PCC_SEM main.cpp MainWindow.cpp MainWindow.h DragLabel.h DragLabel.cpp MainFrame.h MainFrame.cpp utils.h NetworkChecker.cpp NetworkChecker.h Configuration.cpp Configuration.h)
+add_executable(PCC_SEM main.cpp MainWindow.cpp MainWindow.h DragLabel.h DragLabel.cpp MainFrame.h MainFrame.cpp utils.h NetworkChecker.cpp NetworkChecker.h Configuration.cpp Configuration.h SunriseSunsetChecker.cpp SunriseSunsetChecker.h)
+
+
 
 find_package( Qt5Core REQUIRED )
 find_package( Qt5Widgets REQUIRED )

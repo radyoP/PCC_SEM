@@ -7,6 +7,7 @@
 
 
 #include <QtWidgets/QFrame>
+#include <QStateMachine>
 #include "DragLabel.h"
 #include "Configuration.h"
 
@@ -21,6 +22,10 @@ public:
 
     QVector<QLine*> lines;
 
+    QLabel* sunsetLabel;
+
+    QLabel* sunriseLabel;
+
     void paintEvent(QPaintEvent *event) override;
 
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -33,7 +38,10 @@ public:
 
     std::atomic<bool> computer_is_on_network = {true};
 
+    void update_sunset_sunrise();
+
 private:
+
     int num_points;
 
     int curr_value;
@@ -46,6 +54,15 @@ private:
 
     void update_config();
 
+    void create_button();
+    QStateMachine* state_machine;
+    QState *off;
+    QState *on;
+
+    QState *automatic;
+    std::atomic<int> sunrise = {0};
+
+    std::atomic<int> sunset = {0};
 
 };
 

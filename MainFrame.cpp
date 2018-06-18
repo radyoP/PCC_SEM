@@ -8,10 +8,14 @@
 #include <QtCore/QTime>
 #include <QtCore/QTimer>
 #include <QtCore/QThread>
+#include <QtWidgets/QPushButton>
+#include <QtCore/QState>
+
 #include "MainFrame.h"
 #include "utils.h"
 #include "NetworkChecker.h"
 #include "Configuration.h"
+#include "SunriseSunsetChecker.h"
 
 
 #define WIDTH 480
@@ -26,6 +30,15 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     auto pixmap = QPixmap(R"(../images/orange_dot.png)");
     this->offset= QPoint(pixmap.width()/2,pixmap.height()/2);
 
+    sunriseLabel = new QLabel(this);
+    sunsetLabel = new QLabel(this);
+
+    QPixmap sunrisePixmap(R"(../images/sunrise.png)");
+    QPixmap sunsetPixmap(R"(../images/sunset.png)");
+    sunriseLabel->setPixmap(sunrisePixmap.scaledToHeight(48, Qt::SmoothTransformation ));
+    sunsetLabel->setPixmap(sunsetPixmap.scaledToHeight(48, Qt::SmoothTransformation ));
+    sunriseLabel->show();
+    sunsetLabel->show();
 
     auto x = config.getX();
     auto y = config.getY();
@@ -45,27 +58,24 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
                                 (i == num_points-1) ? nullptr : points[i+1]);
     }
 
-    auto networkCheckerThread = new QThread;
-    networkCheckerThread->start();
+
+    create_button();
+
+
+
+    /* dedicated thread for periodically executing bash commands */
+    auto thread = new QThread;
+    thread->start();
 
     auto ntwChecker = new NetworkChecker(this,3, config.getIp());
-    ntwChecker->moveToThread(networkCheckerThread);
+    ntwChecker->moveToThread(thread);
+
+    auto sunsetSunrise = new SunriseSunsetChecker(this, sunrise, sunset);
+    sunsetSunrise->moveToThread(thread);
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainFrame::timedUpdate);
     timer->start(1000);
-
-    /*
-    std::vector<int> x(num_points);
-    std::transform(points.begin(), points.end(), x.begin(), [](DragLabel* point) -> int { return point->x();});
-    config.setX(x);
-    std::vector<int> y(num_points);
-    std::transform(points.begin(), points.end(), y.begin(), [](DragLabel* point) -> int { return point->y();});
-    config.setY(y);
-    config.setIp("192.168.0.103");
-    config.save();
-    */
-
 
 
 
@@ -73,21 +83,20 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
 
 void MainFrame::paintEvent(QPaintEvent *event) {
 
-    QPainter linePainter(this);
-    linePainter.setPen(QPen(QColor(76,76,76), 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
-    linePainter.drawLine(0, HEIGHT/2, WIDTH, HEIGHT/2);
-    QFont font = linePainter.font();
+    QPainter painter(this);
+    painter.setPen(QPen(QColor(76,76,76), 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.drawLine(0, HEIGHT/2, WIDTH, HEIGHT/2);
+    QFont font = painter.font();
     int font_size = 12;
     font.setPointSize(font_size);
 
-    linePainter.setPen(QPen(QColor(76,76,76), 1, Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setPen(QPen(QColor(76,76,76), 1, Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
     for (int i = 0; i < 12; ++i) {
         int x = (WIDTH/12/2) + i*(WIDTH/12);
         const QRect rectangle = QRect(x-20, HEIGHT -font_size, 40, font_size);
         QRect boundingRect;
-        linePainter.drawLine(x, 0, x, HEIGHT-10);
-        linePainter.drawText(rectangle,Qt::AlignCenter, QString::number(2*i+1)+":00", &boundingRect);
-        //linePainter.drawText((WIDTH/12/2) + i*(WIDTH/12), HEIGHT , QString::number(2*i+1));
+        painter.drawLine(x, 0, x, HEIGHT-10);
+        painter.drawText(rectangle,Qt::AlignCenter, QString::number(2*i+1)+":00", &boundingRect);
     }
 
     /* setting moving vertical line */
@@ -100,11 +109,11 @@ void MainFrame::paintEvent(QPaintEvent *event) {
     double y_time = get_y_time(x_time);
     setCurr_value((int) y_time); // Maybe i shouldn't do this so often
 
-    linePainter.setPen(QPen(QColor(255,0,0), 2, Qt::SolidLine));
-    linePainter.drawLine(QLineF(x_time, 0, x_time, HEIGHT));
+    painter.setPen(QPen(QColor(255,0,0), 2, Qt::SolidLine));
+    painter.drawLine(QLineF(x_time, 0, x_time, HEIGHT));
 
 
-    linePainter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::Antialiasing);
     QPainterPath path;
     path.moveTo(QPoint(points[num_points-1]->pos()-QPoint(WIDTH, 0)+offset));
     path.lineTo(points[0]->pos()+offset);
@@ -112,16 +121,15 @@ void MainFrame::paintEvent(QPaintEvent *event) {
         path.lineTo(points[i]->pos()+offset);
     }
     path.lineTo(QPoint(points[0]->pos() + QPoint(WIDTH,0) + offset));
-    linePainter.setPen(QPen(QColor(255,159,48), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    painter.setPen(QPen(QColor(255,159,48), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
-    linePainter.drawPath(path);
+    painter.drawPath(path);
 
 
-    linePainter.setBrush(QColor(255,0,0));
-    linePainter.setPen(QPen(QColor(255,0,0), 0));
-    linePainter.drawEllipse(QPointF( x_time, y_time), 4,4);
+    painter.setBrush(QColor(255,0,0));
+    painter.setPen(QPen(QColor(255,0,0), 0));
+    painter.drawEllipse(QPointF( x_time, y_time), 4,4);
 
-    std::cout << "x :" << x_time << " y: " << y_time << std::endl;
 
 }
 
@@ -168,6 +176,9 @@ double MainFrame::get_y_time(double x) {
 void MainFrame::timedUpdate() {
     update();
     update_config();
+    std::cout << "sunrise: " << sunrise << std::endl;
+    std::cout << "sunset: " << sunset << std::endl;
+
 }
 
 MainFrame::~MainFrame() {
@@ -179,6 +190,49 @@ void MainFrame::update_config() {
     std::transform(points.begin(), points.end(), x.begin(), [](DragLabel* point) -> int { return point->x();});
     std::transform(points.begin(), points.end(), y.begin(), [](DragLabel* point) -> int { return point->y();});
     config.setXY(x,y);
+}
+
+void MainFrame::create_button() {
+    QPushButton *button = new QPushButton(this);
+    state_machine = new QStateMachine(this);
+
+    off = new QState();
+    off->assignProperty(button, "text", "Off");
+    //off->setObjectName("off");
+
+    on = new QState();
+    on->assignProperty(button, "text", "On");
+    //off->setObjectName("on");
+
+    automatic = new QState();
+    automatic->assignProperty(button, "text", "Auto");
+    //off->setObjectName("automatic");
+
+    off->addTransition(button, SIGNAL(clicked()), on);
+    on->addTransition(button, SIGNAL(clicked()), automatic);
+    automatic->addTransition(button, SIGNAL(clicked()), off);
+
+    state_machine->addState(off);
+    state_machine->addState(on);
+    state_machine->addState(automatic);
+
+    state_machine->setInitialState(automatic);
+    state_machine->start();
+
+
+    button->resize(38, 22);
+    button->move(WIDTH-button->width(), HEIGHT-button->height()-12);
+    button->show();
+
+}
+
+void MainFrame::update_sunset_sunrise() {
+    if(sunset != sunrise){
+        double ms_pix = ((double) WIDTH) / 86400000.0;
+        sunriseLabel->move(static_cast<int>(ms_pix * ((double) sunrise.load())) - sunriseLabel->width()/2, -10);
+        std::cout << sunriseLabel->x() << std::endl;
+        sunsetLabel->move(static_cast<int>(ms_pix * ((double) sunset.load()))- sunsetLabel->width()/2, -10 );
+    }
 }
 
 
