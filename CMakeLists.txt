@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(PCC_SEM main.cpp MainWindow.cpp MainWindow.h DragLabel.h DragLabel.cpp MainFrame.h MainFrame.cpp utils.h NetworkChecker.cpp NetworkChecker.h Configuration.cpp Configuration.h SunriseSunsetChecker.cpp SunriseSunsetChecker.h)
 
-
+add_executable(sunwait sunwait/main.c sunwait/print.c sunwait/sunriset.c sunwait/sunriset.h)
 
 find_package( Qt5Core REQUIRED )
 find_package( Qt5Widgets REQUIRED )

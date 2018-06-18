@@ -28,7 +28,7 @@ void SunriseSunsetChecker::check() {
 
     std::array<char, 128> buffer;
     std::string result;
-    std::shared_ptr<FILE> pipe(popen("../sunwait -p 49.944587N 14.515220E", "r"), pclose);
+    std::shared_ptr<FILE> pipe(popen("./sunwait -p 49.944587N 14.515220E", "r"), pclose);
     if(!pipe) throw std::runtime_error("popen() failed!");
     while (!feof(pipe.get())) {
         if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
