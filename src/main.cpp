@@ -5,7 +5,6 @@
 
 #include <QApplication>
 #include <QHBoxLayout>
-#include <QtCore/QResource>
 #include <QtGui/QPainter>
 #include "MainFrame.h"
 #include "NetworkChecker.h"
@@ -39,5 +38,5 @@ int main(int argc, char *argv[]) {
 
     mainWidget.show();
     //QApplication::setOverrideCursor(Qt::BlankCursor);
-    return app.exec();
+    return QApplication::exec();
 }

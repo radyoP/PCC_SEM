@@ -3,17 +3,11 @@
 //
 
 #include "SunriseSunsetChecker.h"
-#include "MainFrame.h"
-#include <cstdio>
 #include <iostream>
 #include <memory>
-#include <stdexcept>
-#include <string>
-#include <array>
 #include <sstream>
 #include <iomanip>
 #include <QtCore/QTime>
-#include "../sunset_lib/src/SunSet.h"
 
 
 SunriseSunsetChecker::SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise,

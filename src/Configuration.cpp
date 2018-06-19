@@ -6,10 +6,8 @@
 #include <iterator>
 #include "Configuration.h"
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <utility>
 
 Configuration::Configuration(std::string filename) : filename(std::move(filename)){
     load();

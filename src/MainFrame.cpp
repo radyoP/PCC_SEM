@@ -12,9 +12,7 @@
 #include <QtCore/QState>
 
 #include "MainFrame.h"
-#include "utils.h"
 #include "NetworkChecker.h"
-#include "Configuration.h"
 #include "SunriseSunsetChecker.h"
 
 

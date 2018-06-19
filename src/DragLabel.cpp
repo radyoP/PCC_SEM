@@ -2,10 +2,8 @@
 // Created by pavel on 13.6.18.
 //
 
-#include <iostream>
 #include "DragLabel.h"
 #include "utils.h"
-#include <algorithm>
 
 DragLabel::DragLabel(QWidget *parent, const int idx)
         : QLabel(parent), idx(idx) {}
