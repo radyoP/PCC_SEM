@@ -9,7 +9,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
 #include "MainFrame.h"
-#include "sunset/src/SunSet.h"
+#include "sunset_lib/src/SunSet.h"
 
 class SunriseSunsetChecker : public QObject {
     Q_OBJECT
