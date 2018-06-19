@@ -12,7 +12,7 @@
 
 class Configuration {
 public:
-    Configuration(std::string filename);
+    explicit Configuration(std::string filename);
 
     void save();
 
@@ -24,6 +24,12 @@ private:
     std::vector<int> y;
 
     std::string ip;
+
+    double lat;
+
+    double lon;
+
+    int tz;
 
     void str_to_vect_int(std::string line, std::vector<int> &vect);
 
@@ -46,6 +52,12 @@ public:
     const std::string &getIp() const;
 
     void setIp(const std::string &ip);
+
+    double getLat() const;
+
+    double getLon() const;
+
+    int getTz() const;
 
 };
 

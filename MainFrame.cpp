@@ -70,7 +70,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     auto ntwChecker = new NetworkChecker(this,3, config.getIp());
     ntwChecker->moveToThread(thread);
 
-    auto sunsetSunrise = new SunriseSunsetChecker(this, sunrise, sunset);
+    auto sunsetSunrise = new SunriseSunsetChecker(this, sunrise, sunset, config.getLat(), config.getLon(), config.getTz());
     sunsetSunrise->moveToThread(thread);
 
     QTimer *timer = new QTimer(this);
@@ -186,7 +186,7 @@ MainFrame::~MainFrame() {
 }
 
 void MainFrame::update_config() {
-    std::vector<int> x(num_points),  y(num_points);
+    std::vector<int> x(static_cast<unsigned long>(num_points)),  y(static_cast<unsigned long>(num_points));
     std::transform(points.begin(), points.end(), x.begin(), [](DragLabel* point) -> int { return point->x();});
     std::transform(points.begin(), points.end(), y.begin(), [](DragLabel* point) -> int { return point->y();});
     config.setXY(x,y);
@@ -228,10 +228,10 @@ void MainFrame::create_button() {
 
 void MainFrame::update_sunset_sunrise() {
     if(sunset != sunrise){
-        double ms_pix = ((double) WIDTH) / 86400000.0;
-        sunriseLabel->move(static_cast<int>(ms_pix * ((double) sunrise.load())) - sunriseLabel->width()/2, -10);
+        double min_pix = ((double) WIDTH) / 1440;
+        sunriseLabel->move(static_cast<int>(min_pix * ((double) sunrise.load())) - sunriseLabel->width()/2, -10);
         std::cout << sunriseLabel->x() << std::endl;
-        sunsetLabel->move(static_cast<int>(ms_pix * ((double) sunset.load()))- sunsetLabel->width()/2, -10 );
+        sunsetLabel->move(static_cast<int>(min_pix * ((double) sunset.load()))- sunsetLabel->width()/2, -10 );
     }
 }
 

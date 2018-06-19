@@ -8,9 +8,10 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
+#include <utility>
 
-
-Configuration::Configuration(std::string filename) : filename(filename){
+Configuration::Configuration(std::string filename) : filename(std::move(filename)){
     load();
 }
 
@@ -37,14 +38,29 @@ void Configuration::load() {
     std::ifstream file(filename);
     std::string line;
 
+    // x coordinates
     std::getline(file, line);
     str_to_vect_int(line, x);
 
+    // y coordinates
     std::getline(file, line);
     str_to_vect_int(line, y);
 
+    // ip address
     std::getline(file, line);
     ip = line;
+
+    // latitude
+    std::getline(file, line);
+    lat = std::stod(line);
+
+    // longitude
+    std::getline(file, line);
+    lon = std::stod(line);
+
+    // time zone
+    std::getline(file, line);
+    tz = std::stoi(line);
 
     file.close();
 }
@@ -55,6 +71,10 @@ void Configuration::save() {
     file << vector_to_str(x) << "\n";
     file << vector_to_str(y) << "\n";
     file << ip << "\n";
+    file << std::setprecision(8);
+    file << lat << "\n";
+    file << lon << "\n";
+    file << tz << "\n";
     file.close();
     std::cout << "saved\n";
 }
@@ -88,5 +108,17 @@ void Configuration::setXY(const std::vector<int> &x, const std::vector<int> &y) 
         changed = true;
     }
     if(changed) save();
+}
+
+double Configuration::getLat() const {
+    return lat;
+}
+
+double Configuration::getLon() const {
+    return lon;
+}
+
+int Configuration::getTz() const {
+    return tz;
 }
 

@@ -13,11 +13,14 @@
 #include <sstream>
 #include <iomanip>
 #include <QtCore/QTime>
+#include "sunset/src/SunSet.h"
 
 
-SunriseSunsetChecker::SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise, std::atomic<int> &sunset) : mainFrame(mainFrame),
-                                                                                                                     sunrise(sunrise),
-                                                                                                                     sunset(sunset) {
+SunriseSunsetChecker::SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise,
+                                           std::atomic<int> &sunset, double lat, double lon, int tz) : mainFrame(mainFrame),
+                                                                                                       sunrise(sunrise),
+                                                                                                       sunset(sunset),
+                                                                                                       sunSetCal(lat, lon, 0) {
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(check()));
     check();
@@ -25,31 +28,12 @@ SunriseSunsetChecker::SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int
 }
 
 void SunriseSunsetChecker::check() {
+    QDate date = QDate::currentDate();
+    sunSetCal.setCurrentDate(date.year(), date.month(), date.day());
 
-    std::array<char, 128> buffer;
-    std::string result;
-    std::shared_ptr<FILE> pipe(popen("./sunwait -p 49.944587N 14.515220E", "r"), pclose);
-    if(!pipe) throw std::runtime_error("popen() failed!");
-    while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
-            result += buffer.data();
-    }
-
-
-    std::istringstream iss(result);
-    std::string line;
-    std::getline(iss, line);
-    sunrise = msFromString(line);
-    std::getline(iss, line);
-    sunset = msFromString(line);
-
+    sunrise = sunSetCal.calcSunrise();
+    sunset = sunSetCal.calcSunset();
     mainFrame->update_sunset_sunrise();
-}
-
-int SunriseSunsetChecker::msFromString(std::string &str) {
-
-    QTime time = QTime::fromString(str.data(), "hh:mm");
-    return time.msecsSinceStartOfDay();
 
 }
 

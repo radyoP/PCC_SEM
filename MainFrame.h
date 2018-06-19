@@ -16,7 +16,7 @@ class MainFrame : public QFrame{
 public:
     explicit MainFrame(QWidget *parent, int num_points);
 
-    virtual ~MainFrame();
+    ~MainFrame() override;
 
     QVector<DragLabel*> points;
 
@@ -60,9 +60,9 @@ private:
     QState *on;
 
     QState *automatic;
-    std::atomic<int> sunrise = {0};
+    std::atomic<int> sunrise = {0}; // minutes from midnight to sunrise
 
-    std::atomic<int> sunset = {0};
+    std::atomic<int> sunset = {0};  // minutes from midnight to sunset
 
 };
 

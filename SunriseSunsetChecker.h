@@ -9,20 +9,22 @@
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
 #include "MainFrame.h"
+#include "sunset/src/SunSet.h"
 
 class SunriseSunsetChecker : public QObject {
     Q_OBJECT
 public:
-    SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise, std::atomic<int> &sunset);
+    SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise,
+                         std::atomic<int> &sunset, double lat, double lon, int tz);
 
 private:
     QTimer* timer;
+    SunSet sunSetCal;
+
     std::atomic<int> &sunrise;
     std::atomic<int> &sunset;
 
     MainFrame* mainFrame;
-
-    int msFromString(std::string &str);
 
 public slots:
     void check();
