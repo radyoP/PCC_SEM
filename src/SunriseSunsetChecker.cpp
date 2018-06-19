@@ -13,7 +13,7 @@
 #include <sstream>
 #include <iomanip>
 #include <QtCore/QTime>
-#include "sunset_lib/src/SunSet.h"
+#include "../sunset_lib/src/SunSet.h"
 
 
 SunriseSunsetChecker::SunriseSunsetChecker(MainFrame *mainFrame, std::atomic<int> &sunrise,
