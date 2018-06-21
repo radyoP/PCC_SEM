@@ -60,6 +60,10 @@ void Configuration::load() {
     std::getline(file, line);
     tz = std::stoi(line);
 
+    // Arduino file name
+    std::getline(file, line);
+    arduinoFile = line;
+
     file.close();
 }
 
@@ -73,6 +77,7 @@ void Configuration::save() {
     file << lat << "\n";
     file << lon << "\n";
     file << tz << "\n";
+    file << arduinoFile << "\n";
     file.close();
     std::cout << "saved\n";
 }
@@ -118,5 +123,9 @@ double Configuration::getLon() const {
 
 int Configuration::getTz() const {
     return tz;
+}
+
+const std::string &Configuration::getArduinoFile() const {
+    return arduinoFile;
 }
 

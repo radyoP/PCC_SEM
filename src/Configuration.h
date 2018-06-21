@@ -25,6 +25,12 @@ private:
 
     std::string ip;
 
+    std::string arduinoFile;
+public:
+    const std::string &getArduinoFile() const;
+
+private:
+
     double lat;
 
     double lon;

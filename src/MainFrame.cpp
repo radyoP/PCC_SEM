@@ -75,7 +75,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     connect(timer, &QTimer::timeout, this, &MainFrame::timedUpdate);
     timer->start(1000);
 
-
+    arduino = new ArduinoComunicator(config.getArduinoFile());
 
 }
 
@@ -174,6 +174,9 @@ double MainFrame::get_y_time(double x) {
 void MainFrame::timedUpdate() {
     update();
     update_config();
+    int val = (state_machine->configuration().contains(off)) ? 0 : 1;
+    arduino->update(val);
+
     std::cout << "sunrise: " << sunrise << std::endl;
     std::cout << "sunset: " << sunset << std::endl;
 

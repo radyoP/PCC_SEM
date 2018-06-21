@@ -10,6 +10,7 @@
 #include <QStateMachine>
 #include "DragLabel.h"
 #include "Configuration.h"
+#include "ArduinoComunicator.h"
 
 class MainFrame : public QFrame{
     Q_OBJECT
@@ -63,6 +64,8 @@ private:
     std::atomic<int> sunrise = {0}; // minutes from midnight to sunrise
 
     std::atomic<int> sunset = {0};  // minutes from midnight to sunset
+
+    ArduinoComunicator* arduino;
 
 };
 
