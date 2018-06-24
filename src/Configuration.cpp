@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include <iterator>
-#include "Configuration.h"
+#include "../include/Configuration.h"
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -60,9 +60,9 @@ void Configuration::load() {
     std::getline(file, line);
     tz = std::stoi(line);
 
-    // Arduino file name
+    // Light sensor threshold
     std::getline(file, line);
-    arduinoFile = line;
+    lightSensorThreshold = std::stoi(line);
 
     file.close();
 }
@@ -77,7 +77,7 @@ void Configuration::save() {
     file << lat << "\n";
     file << lon << "\n";
     file << tz << "\n";
-    file << arduinoFile << "\n";
+    file << lightSensorThreshold << "\n";
     file.close();
     std::cout << "saved\n";
 }
@@ -125,7 +125,8 @@ int Configuration::getTz() const {
     return tz;
 }
 
-const std::string &Configuration::getArduinoFile() const {
-    return arduinoFile;
+int Configuration::getLightSensorThreshold() const {
+    return lightSensorThreshold;
 }
+
 

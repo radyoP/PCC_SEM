@@ -25,10 +25,6 @@ private:
 
     std::string ip;
 
-    std::string arduinoFile;
-public:
-    const std::string &getArduinoFile() const;
-
 private:
 
     double lat;
@@ -36,6 +32,12 @@ private:
     double lon;
 
     int tz;
+
+    int lightSensorThreshold;
+public:
+    int getLightSensorThreshold() const;
+
+private:
 
     void str_to_vect_int(std::string line, std::vector<int> &vect);
 

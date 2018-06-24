@@ -8,9 +8,9 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(cppzmq)
 
 
-add_executable(PCC_SEM src/main.cpp src/DragLabel.h src/DragLabel.cpp src/MainFrame.h src/MainFrame.cpp src/utils.h
-        src/NetworkChecker.cpp src/NetworkChecker.h src/Configuration.cpp src/Configuration.h
-        src/SunriseSunsetChecker.cpp src/SunriseSunsetChecker.h sunset_lib/src/SunSet.h sunset_lib/src/SunSet.cpp src/ArduinoComunicator.cpp src/ArduinoComunicator.h)
+add_executable(PCC_SEM src/main.cpp include/DragLabel.h src/DragLabel.cpp include/MainFrame.h src/MainFrame.cpp include/utils.h
+        src/NetworkChecker.cpp include/NetworkChecker.h src/Configuration.cpp include/Configuration.h
+        src/SunriseSunsetChecker.cpp include/SunriseSunsetChecker.h sunset_lib/src/SunSet.h sunset_lib/src/SunSet.cpp src/ArduinoComunicator.cpp include/ArduinoComunicator.h)
 
 
 

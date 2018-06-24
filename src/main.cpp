@@ -6,8 +6,8 @@
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QtGui/QPainter>
-#include "MainFrame.h"
-#include "NetworkChecker.h"
+#include "../include/MainFrame.h"
+#include "../include/NetworkChecker.h"
 
 
 int main(int argc, char *argv[]) {

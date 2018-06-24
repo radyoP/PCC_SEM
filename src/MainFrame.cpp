@@ -11,18 +11,19 @@
 #include <QtWidgets/QPushButton>
 #include <QtCore/QState>
 
-#include "MainFrame.h"
-#include "NetworkChecker.h"
-#include "SunriseSunsetChecker.h"
+#include "../include/MainFrame.h"
+#include "../include/NetworkChecker.h"
+#include "../include/SunriseSunsetChecker.h"
+#include "../include/ArduinoComunicator.h"
 
 
 #define WIDTH 480
 #define HEIGHT 320
 
-MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::FramelessWindowHint), num_points(num_points), points(num_points), lines(num_points+2), config("../config.txt") {
+MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::FramelessWindowHint), num_points(num_points), points(num_points), lines(num_points+2), config("../config.txt")
+                                                         {
     setMinimumSize(WIDTH, HEIGHT );
 
-    //setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setAcceptDrops(true);
     this->num_points = num_points;
     auto pixmap = QPixmap(R"(../images/orange_dot.png)");
@@ -75,8 +76,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     connect(timer, &QTimer::timeout, this, &MainFrame::timedUpdate);
     timer->start(1000);
 
-    arduino = new ArduinoComunicator(config.getArduinoFile());
-
+    arduino = new ArduinoComunicator(lightSensorValue, this);
 }
 
 void MainFrame::paintEvent(QPaintEvent *event) {
@@ -100,12 +100,9 @@ void MainFrame::paintEvent(QPaintEvent *event) {
     /* setting moving vertical line */
 
     /* getting time */
-    QTime currTime = QTime::currentTime();
-    int time = currTime.msecsSinceStartOfDay();
-    /* converting to x y values */
-    double x_time = ((double) WIDTH) / 86400000.0 * time;
-    double y_time = get_y_time(x_time);
-    setCurr_value((int) y_time); // Maybe i shouldn't do this so often
+    double x_time = getXTime();
+    double y_time = getYTimeFromX(x_time);
+    setCurr_value((int) y_time);
 
     painter.setPen(QPen(QColor(255,0,0), 2, Qt::SolidLine));
     painter.drawLine(QLineF(x_time, 0, x_time, HEIGHT));
@@ -133,10 +130,10 @@ void MainFrame::paintEvent(QPaintEvent *event) {
 
 
 void MainFrame::setCurr_value(int curr_value) {
-    if(curr_value != this->curr_value){
+    if(curr_value != this->currValue){
         send();
     }
-    MainFrame::curr_value = curr_value;
+    MainFrame::currValue = curr_value;
 }
 
 void MainFrame::mouseReleaseEvent(QMouseEvent *event) {
@@ -147,7 +144,7 @@ void MainFrame::send() {
     //std::cout << "sending" << std::endl;
 }
 
-double MainFrame::get_y_time(double x) {
+double MainFrame::getYTimeFromX(double x) {
 
 
     if(x > points[0]->x() + offset.x()){
@@ -174,11 +171,12 @@ double MainFrame::get_y_time(double x) {
 void MainFrame::timedUpdate() {
     update();
     update_config();
-    int val = (state_machine->configuration().contains(off)) ? 0 : 1;
-    arduino->update(val);
+    int val = (stateMachine->configuration().contains(off)) ? 0 : 1;
+    //arduino->update(val);
 
     std::cout << "sunrise: " << sunrise << std::endl;
     std::cout << "sunset: " << sunset << std::endl;
+    std::cout << "light sensor: " << lightSensorValue << std::endl;
 
 }
 
@@ -195,30 +193,30 @@ void MainFrame::update_config() {
 
 void MainFrame::create_button() {
     QPushButton *button = new QPushButton(this);
-    state_machine = new QStateMachine(this);
+    stateMachine = new QStateMachine(this);
 
     off = new QState();
     off->assignProperty(button, "text", "Off");
-    //off->setObjectName("off");
+    off->setObjectName("off");
 
     on = new QState();
     on->assignProperty(button, "text", "On");
-    //off->setObjectName("on");
+    off->setObjectName("on");
 
     automatic = new QState();
     automatic->assignProperty(button, "text", "Auto");
-    //off->setObjectName("automatic");
+    off->setObjectName("automatic");
 
     off->addTransition(button, SIGNAL(clicked()), on);
     on->addTransition(button, SIGNAL(clicked()), automatic);
     automatic->addTransition(button, SIGNAL(clicked()), off);
 
-    state_machine->addState(off);
-    state_machine->addState(on);
-    state_machine->addState(automatic);
+    stateMachine->addState(off);
+    stateMachine->addState(on);
+    stateMachine->addState(automatic);
 
-    state_machine->setInitialState(automatic);
-    state_machine->start();
+    stateMachine->setInitialState(automatic);
+    stateMachine->start();
 
 
     button->resize(38, 22);
@@ -227,13 +225,43 @@ void MainFrame::create_button() {
 
 }
 
-void MainFrame::update_sunset_sunrise() {
+void MainFrame::updateSunsetSunrise() {
     if(sunset != sunrise){
         double min_pix = ((double) WIDTH) / 1440;
         sunriseLabel->move(static_cast<int>(min_pix * ((double) sunrise.load())) - sunriseLabel->width()/2, -10);
         std::cout << sunriseLabel->x() << std::endl;
         sunsetLabel->move(static_cast<int>(min_pix * ((double) sunset.load()))- sunsetLabel->width()/2, -10 );
     }
+}
+
+std::string MainFrame::getValue() {
+    QTime currTime = QTime::currentTime();
+    int time = currTime.msecsSinceStartOfDay()/1000;
+    if(stateMachine->configuration().contains(off)){
+        return "0 0\n";
+    }else if(stateMachine->configuration().contains(on)){
+        return yToValue();
+    }else if(computerIsOnNetwork &&
+             (time < sunrise*60 || time > sunset*60) &&
+             lightSensorValue > config.getLightSensorThreshold()){
+        return yToValue();
+    }
+    return "0 0\n";
+}
+
+std::string MainFrame::yToValue() {
+    double val = static_cast<double>(currValue) / 320.0;
+    auto warm = static_cast<int>((1.0 - val) * 255);
+    auto cold = static_cast<int>(val*255);
+    std::stringstream stream;
+    stream << warm << " " << cold << "\n";
+    return stream.str();
+}
+
+double MainFrame::getXTime() {
+    QTime currTime = QTime::currentTime();
+    int time = currTime.msecsSinceStartOfDay();
+    return ((double) WIDTH) / 86400000.0 * time;
 }
 
 

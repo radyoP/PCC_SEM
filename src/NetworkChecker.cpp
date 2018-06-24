@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "NetworkChecker.h"
+#include "../include/NetworkChecker.h"
 
 NetworkChecker::NetworkChecker(MainFrame *mainFrame, int sleep_s, const std::string &ip) : mainFrame(
         mainFrame), ip(ip) {
@@ -13,6 +13,6 @@ NetworkChecker::NetworkChecker(MainFrame *mainFrame, int sleep_s, const std::str
 }
 
 void NetworkChecker::checkNetwork() {
-    mainFrame->computer_is_on_network.store(system(("ping -c 4 " + ip + " > /dev/null").data()) == 0);
-    std::cout << "Is on network:" << mainFrame->computer_is_on_network << std::endl;
+    mainFrame->computerIsOnNetwork.store(system(("ping -c 4 " + ip + " > /dev/null").data()) == 0);
+    std::cout << "Is on network:" << mainFrame->computerIsOnNetwork << std::endl;
 }

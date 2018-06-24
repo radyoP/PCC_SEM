@@ -2,7 +2,7 @@
 // Created by pavel on 18.6.18.
 //
 
-#include "SunriseSunsetChecker.h"
+#include "../include/SunriseSunsetChecker.h"
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -27,7 +27,7 @@ void SunriseSunsetChecker::check() {
 
     sunrise = sunSetCal.calcSunrise();
     sunset = sunSetCal.calcSunset();
-    mainFrame->update_sunset_sunrise();
+    mainFrame->updateSunsetSunrise();
 
 }
 

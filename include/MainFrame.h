@@ -10,7 +10,8 @@
 #include <QStateMachine>
 #include "DragLabel.h"
 #include "Configuration.h"
-#include "ArduinoComunicator.h"
+//#include "ArduinoComunicator.h"
+class ArduinoComunicator;
 
 class MainFrame : public QFrame{
     Q_OBJECT
@@ -18,6 +19,8 @@ public:
     explicit MainFrame(QWidget *parent, int num_points);
 
     ~MainFrame() override;
+
+    std::string getValue();
 
     QVector<DragLabel*> points;
 
@@ -37,35 +40,44 @@ public:
 
     void timedUpdate();
 
-    std::atomic<bool> computer_is_on_network = {true};
+    std::atomic<bool> computerIsOnNetwork = {true};
 
-    void update_sunset_sunrise();
+    void updateSunsetSunrise();
 
 private:
 
     int num_points;
 
-    int curr_value;
+    std::atomic<int> currValue;
 
-    double get_y_time(double x);
+    double getXTime();
+
+    double getYTimeFromX(double x);
 
     QPoint offset;
-
-    Configuration config;
 
     void update_config();
 
     void create_button();
-    QStateMachine* state_machine;
+
+    QStateMachine* stateMachine;
     QState *off;
     QState *on;
-
     QState *automatic;
-    std::atomic<int> sunrise = {0}; // minutes from midnight to sunrise
 
+    std::atomic<int> sunrise = {0}; // minutes from midnight to sunrise
     std::atomic<int> sunset = {0};  // minutes from midnight to sunset
 
+    std::atomic<int> lightSensorValue = {1024};
+
     ArduinoComunicator* arduino;
+
+    Configuration config;
+
+    std::string yToValue();
+
+
+private:
 
 };
 
