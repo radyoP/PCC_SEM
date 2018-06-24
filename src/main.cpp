@@ -12,10 +12,8 @@
 
 int main(int argc, char *argv[]) {
 
-    //nova QT aplikace
     QApplication app(argc, argv);
 
-    //MainWindow o;
     QWidget mainWidget;
 
     // layout

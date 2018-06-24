@@ -16,14 +16,6 @@ ArduinoComunicator::ArduinoComunicator(std::atomic<int> &lightSensorValue,
     socket = new zmq::socket_t(*context, ZMQ_REP);
     socket->bind("tcp://*:5555");
     system("python3 ../src/SerialComunicator.py &");
-    zmq::message_t request;
-    socket->recv(&request);
-    char msg[request.size()+1] = {0};
-    memcpy(msg, request.data(), request.size());
-    std::cout << "c++ recived: " << msg << std::endl;
-    zmq::message_t reply(2);
-    memcpy(reply.data(), "43", 2);
-    socket->send(reply);
     QtConcurrent::run(this, &ArduinoComunicator::receive);
 
 }

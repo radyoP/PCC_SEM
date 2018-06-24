@@ -29,6 +29,7 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
     auto pixmap = QPixmap(R"(../images/orange_dot.png)");
     this->offset= QPoint(pixmap.width()/2,pixmap.height()/2);
 
+    /* Creating sunset/sunrise labels */
     sunriseLabel = new QLabel(this);
     sunsetLabel = new QLabel(this);
 
@@ -41,37 +42,35 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
 
     auto x = config.getX();
     auto y = config.getY();
+
     /* Creating points */
     for (int i = 0; i < num_points; ++i) {
         auto point = new DragLabel(this, i);
         points[i] = point;
         point->setPixmap(pixmap);
         point->move(QPoint(x[i], y[i]));
-        //point->move(QPoint((WIDTH/num_points/2) + i*(WIDTH/(num_points)) , HEIGHT/2)-offset);
         point->show();
         point->setAttribute(Qt::WA_DeleteOnClose);
     }
-
+    /* Setting point's neighbours */
     for (int i = 0; i < num_points; ++i) {
         points[i]->setLeftRight((i == 0) ? nullptr : points[i-1],
                                 (i == num_points-1) ? nullptr : points[i+1]);
     }
 
-
     create_button();
 
-
-
-    /* dedicated thread for periodically executing bash commands */
+    /* dedicated thread for periodically code, which might take to long and block the ui */
     auto thread = new QThread;
     thread->start();
-
+    /* Like this. This latterly pings one ip address periodically */
     auto ntwChecker = new NetworkChecker(this,3, config.getIp());
     ntwChecker->moveToThread(thread);
 
     auto sunsetSunrise = new SunriseSunsetChecker(this, sunrise, sunset, config.getLat(), config.getLon(), config.getTz());
     sunsetSunrise->moveToThread(thread);
 
+    /* timer for more frequent actions, but not blocking */
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainFrame::timedUpdate);
     timer->start(1000);
@@ -80,14 +79,16 @@ MainFrame::MainFrame(QWidget *parent, int num_points) : QFrame(parent, Qt::Frame
 }
 
 void MainFrame::paintEvent(QPaintEvent *event) {
-
+    /* drawing horizontal line */
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(QColor(76,76,76), 1, Qt::DashLine, Qt::RoundCap, Qt::RoundJoin));
     painter.drawLine(0, HEIGHT/2, WIDTH, HEIGHT/2);
     QFont font = painter.font();
     int font_size = 12;
     font.setPointSize(font_size);
 
+    /* writing hours at the bottom */
     painter.setPen(QPen(QColor(76,76,76), 1, Qt::DotLine, Qt::RoundCap, Qt::RoundJoin));
     for (int i = 0; i < 12; ++i) {
         int x = (WIDTH/12/2) + i*(WIDTH/12);
@@ -107,8 +108,7 @@ void MainFrame::paintEvent(QPaintEvent *event) {
     painter.setPen(QPen(QColor(255,0,0), 2, Qt::SolidLine));
     painter.drawLine(QLineF(x_time, 0, x_time, HEIGHT));
 
-
-    painter.setRenderHint(QPainter::Antialiasing);
+    /* drawing path through points */
     QPainterPath path;
     path.moveTo(QPoint(points[num_points-1]->pos()-QPoint(WIDTH, 0)+offset));
     path.lineTo(points[0]->pos()+offset);
@@ -120,7 +120,7 @@ void MainFrame::paintEvent(QPaintEvent *event) {
 
     painter.drawPath(path);
 
-
+    /* drawing red dot, representing current time and value */
     painter.setBrush(QColor(255,0,0));
     painter.setPen(QPen(QColor(255,0,0), 0));
     painter.drawEllipse(QPointF( x_time, y_time), 4,4);
@@ -130,9 +130,6 @@ void MainFrame::paintEvent(QPaintEvent *event) {
 
 
 void MainFrame::setCurr_value(int curr_value) {
-    if(curr_value != this->currValue){
-        send();
-    }
     MainFrame::currValue = curr_value;
 }
 
@@ -140,13 +137,12 @@ void MainFrame::mouseReleaseEvent(QMouseEvent *event) {
 
 }
 
-void MainFrame::send() {
-    //std::cout << "sending" << std::endl;
-}
-
 double MainFrame::getYTimeFromX(double x) {
-
-
+    /*
+     * This might look to complicated, but it has to be
+     * First I need to find the line with which to intersect
+     * and only then I can find the intersection point
+     */
     if(x > points[0]->x() + offset.x()){
         for (int i = 0; i < num_points-1; ++i) {
             if(x < points[(i+1)]->x() + offset.x()){
@@ -171,13 +167,6 @@ double MainFrame::getYTimeFromX(double x) {
 void MainFrame::timedUpdate() {
     update();
     update_config();
-    int val = (stateMachine->configuration().contains(off)) ? 0 : 1;
-    //arduino->update(val);
-
-    std::cout << "sunrise: " << sunrise << std::endl;
-    std::cout << "sunset: " << sunset << std::endl;
-    std::cout << "light sensor: " << lightSensorValue << std::endl;
-
 }
 
 MainFrame::~MainFrame() {

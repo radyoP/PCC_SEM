@@ -36,7 +36,6 @@ public:
 
     void setCurr_value(int curr_value);
 
-    void send();
 
     void timedUpdate();
 

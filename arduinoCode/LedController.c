@@ -1,4 +1,4 @@
-#define SEND_FREQ 2500
+#define SEND_FREQ 500
 
 
 /* ======= LedController ======= */
@@ -43,12 +43,12 @@ class WhiteLedController : LedController {
     void set(int warm, int cold) {
       analogWrite(warmLedPin, filter(warm));
       analogWrite(coldLedPin, filter(cold));
-      Serial.print("warm: ");
+      /*Serial.print("warm: ");
       Serial.println(filter(warm));
       Serial.print("\n");
       Serial.print("cold: ");
       Serial.println(filter(cold));
-      Serial.print("\n");
+      Serial.print("\n");*/
     }
 
   private:

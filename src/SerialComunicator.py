@@ -1,19 +1,21 @@
 import zmq
 import time
+import serial
 
 def run():
+    ser = serial.Serial('/dev/ttyUSB0', 9600)
     print("python started")
 
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect("tcp://localhost:5555")
-    socket.send(b"42")
-    message = socket.recv()
-    print(f'reply: {message}')
-    for i in range(10, 20):
-        socket.connect("tcp://localhost:5555")
-        socket.send(str(i).encode())
+
+    while True:
+        line = ser.readline()
+        print(f"Arduino send: {line}")
+        socket.send(line.encode())
         message = socket.recv()
+        ser.write(message.encode())
         print(f'reply: {message}')
         time.sleep(1)
 
